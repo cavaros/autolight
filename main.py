@@ -1,8 +1,10 @@
-import subprocess, time
+import subprocess  # nosec
+import time
 
 import cv2
 
-class AutoLight():
+
+class AutoLight:
     def __init__(self, max_value, edge_threshold):
         """
         Initializes the AutoLight class.
@@ -27,7 +29,9 @@ class AutoLight():
             float: Brightness value.
         """
         # Calculate brightness level based on signal value
-        step = (self.screen_threshold[1] - self.screen_threshold[0])/self.cam_threshold[1]
+        step = (
+            self.screen_threshold[1] - self.screen_threshold[0]
+        ) / self.cam_threshold[1]
         brightness = (signal * step) + self.screen_threshold[0]
         return int(brightness)
 
@@ -84,29 +88,45 @@ class AutoLight():
             brightness_level (float): Brightness value between custom threshold.
         """
         # Convert brightness level to string representation for dbus
-        brightness_string = str(self.convert_signal_to_brightness(brightness_level))
-        subprocess.run(["qdbus",
-                        "org.kde.Solid.PowerManagement",
-                        "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
-                        "org.kde.Solid.PowerManagement.Actions.BrightnessControl.setBrightnessSilent",
-                        brightness_string
-                        ])
-        
+        brightness = self.convert_signal_to_brightness(brightness_level)
+        if brightness in range(self.screen_threshold[0], self.screen_threshold[1]):
+            brightness_string = str(self.convert_signal_to_brightness(brightness_level))
+            subprocess.run(
+                [
+                    "/usr/bin/qdbus",
+                    "org.kde.Solid.PowerManagement",
+                    "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
+                    "org.kde.Solid.PowerManagement.Actions.BrightnessControl.setBrightnessSilent",
+                    brightness_string,
+                ]
+            )  # nosec
+        else:
+            print("Brightness value out of range!")
+            return
+
     def run(self):
         """
         Runs the auto-brightness script.
         """
         # Continuously check for changes in brightness
         while True:
-            time.sleep(1)
+            time.sleep(3)
             current_value = self.detect_light()
-            self.wake_threshold = [self.last_value - self.edge_threshold, self.last_value + self.edge_threshold]
-            if current_value not in range(self.wake_threshold[0], self.wake_threshold[1]):
+            self.wake_threshold = [
+                self.last_value - self.edge_threshold,
+                self.last_value + self.edge_threshold,
+            ]
+            if current_value not in range(
+                self.wake_threshold[0], self.wake_threshold[1]
+            ):
                 self.last_value = current_value
                 self.set_brightness(current_value)
 
+
 if __name__ == "__main__":
     # Example usage
-    max_brightness_value = 80  # Maximum brightness value (0-255)
+    max_brightness_value = 100  # Maximum brightness value (0-255)
     edge_threshold = 10  # Threshold for triggering brightness adjust
-    AutoLight(max_brightness_value, edge_threshold).run()  # Run the auto-brightness script (continuously)
+    AutoLight(
+        max_brightness_value, edge_threshold
+    ).run()  # Run the auto-brightness script (continuously)
