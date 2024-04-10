@@ -14,7 +14,7 @@ class AutoLight:
             edge_threshold (int): Threshold for triggering brightness adjust.
         """
         self.screen_threshold = [1067, 21333]
-        self.cam_threshold = [0, max_value if max_value <= 255 else 255]
+        self.cam_threshold = [0, (max_value if max_value <= 255 else 255)]
         self.last_value = 0
         self.edge_threshold = edge_threshold
 
@@ -32,7 +32,7 @@ class AutoLight:
         step = (
             self.screen_threshold[1] - self.screen_threshold[0]
         ) / self.cam_threshold[1]
-        brightness = (signal * step) + self.screen_threshold[0]
+        brightness = ((signal if signal < self.cam_threshold[1] else self.cam_threshold[1]) * step) + self.screen_threshold[0]
         return int(brightness)
 
     def detect_light(self):
@@ -89,7 +89,7 @@ class AutoLight:
         """
         # Convert brightness level to string representation for dbus
         brightness = self.convert_signal_to_brightness(brightness_level)
-        if brightness in range(self.screen_threshold[0], self.screen_threshold[1]):
+        if brightness in range(self.screen_threshold[0], self.screen_threshold[1]+1):
             brightness_string = str(self.convert_signal_to_brightness(brightness_level))
             subprocess.run(
                 [
@@ -102,6 +102,7 @@ class AutoLight:
             )  # nosec
         else:
             print("Brightness value out of range!")
+            print(brightness)
             return
 
     def run(self):
@@ -117,7 +118,7 @@ class AutoLight:
                 self.last_value + self.edge_threshold,
             ]
             if current_value not in range(
-                self.wake_threshold[0], self.wake_threshold[1]
+                self.wake_threshold[0], self.wake_threshold[1]+1
             ):
                 self.last_value = current_value
                 self.set_brightness(current_value)
@@ -125,7 +126,7 @@ class AutoLight:
 
 if __name__ == "__main__":
     # Example usage
-    max_brightness_value = 100  # Maximum brightness value (0-255)
+    max_brightness_value = 255  # Maximum brightness value (0-255)
     edge_threshold = 10  # Threshold for triggering brightness adjust
     AutoLight(
         max_brightness_value, edge_threshold
