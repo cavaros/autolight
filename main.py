@@ -1,7 +1,12 @@
+import os
 import subprocess  # nosec
 import time
+import logging
 
 import cv2
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 
 class AutoLight:
@@ -126,8 +131,9 @@ class AutoLight:
 
 if __name__ == "__main__":
     # Example usage
-    max_brightness_value = 255  # Maximum brightness value (0-255)
-    edge_threshold = 10  # Threshold for triggering brightness adjust
+    max_brightness_value = int(os.getenv("MAX_BRIGHTNESS_VALUE", 255))  # Maximum brightness value (0-255)
+    edge_threshold = int(os.getenv("EDGE_THRESHOLD", 10))  # Threshold for triggering brightness adjust
+    logger.info(f"Starting autolight with MAX={max_brightness_value} EDGE={edge_threshold}")
     AutoLight(
         max_brightness_value, edge_threshold
     ).run()  # Run the auto-brightness script (continuously)
