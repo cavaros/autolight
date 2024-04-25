@@ -98,7 +98,7 @@ class AutoLight:
             brightness_string = str(self.convert_signal_to_brightness(brightness_level))
             subprocess.run(
                 [
-                    "/usr/bin/qdbus",
+                    "/usr/bin/qdbus-qt5",
                     "org.kde.Solid.PowerManagement",
                     "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
                     "org.kde.Solid.PowerManagement.Actions.BrightnessControl.setBrightnessSilent",
