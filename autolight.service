@@ -4,7 +4,7 @@ Description=Webcam based auto brightness
 [Service]
 Restart=on-failure
 WorkingDirectory=/home/lucas/repos/autolight
-EnvironmentFile=/home/lucas/repos/autolight/config.env
+EnvironmentFile=/home/lucas/repos/autolight/config
 ExecStart=/home/lucas/repos/autolight/.venv/bin/python main.py
 
 [Install]
