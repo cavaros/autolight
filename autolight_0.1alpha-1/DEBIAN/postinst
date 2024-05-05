@@ -1,0 +1,7 @@
+cd /usr/local/bin/autolight
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+export USERNAME=lucas
+sudo cp autolight.service /etc/systemd/user
+systemctl --user --machine=$USERNAME@ enable autolight
+systemctl --user --machine=$USERNAME@ start autolight

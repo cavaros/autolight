@@ -1,0 +1,11 @@
+[Unit]
+Description=Webcam based auto brightness
+
+[Service]
+Restart=on-failure
+WorkingDirectory=/usr/local/bin/autolight
+EnvironmentFile=/usr/local/bin/autolight/config
+ExecStart=/usr/local/bin/autolight/.venv/bin/python3 main.py
+
+[Install]
+WantedBy=default.target
